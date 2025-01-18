@@ -1,46 +1,62 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const config = require('config');
+const WebSocket = require('ws');
 
-// ルートとソケットロジックのインポート
-const apiRoutes = require('./routes/api');
-const userRoutes = require('./routes/user');
-const gameSocket = require('./sockets/gameSocket');
+// サーバーのホストとポート
+const HOST = '127.0.0.1';
+const PORT = 3000;
 
-// サーバ設定
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: '*', // 必要に応じて許可するオリジンを設定
-        methods: ['GET', 'POST']
-    }
+// WebSocketサーバーを作成
+const wss = new WebSocket.Server({ host: HOST, port: PORT }, () => {
+    console.log(`Server started on ws://${HOST}:${PORT}`);
 });
 
-// ミドルウェア
-app.use(express.json()); // JSONリクエストのパース
-app.use(express.static('public')); // 静的ファイルの提供
+// クライアントリスト
+const clients = new Set();
 
-// APIルートの登録
-app.use('/api', apiRoutes);
-app.use('/users', userRoutes);
+// クライアント接続時の処理
+wss.on('connection', (ws) => {
+    console.log('New client connected');
+    clients.add(ws);
 
-// Socket.IO接続イベント
-io.on('connection', (socket) => {
-    console.log(`A user connected: ${socket.id}`);
-    
-    // ゲーム用のSocket.IOロジックを登録
-    gameSocket(socket, io);
+    // クライアントからのメッセージを処理
+    ws.on('message', (message) => {
+        console.log(`Received: ${message}`);
+        onMessage(message);
+    });
 
     // クライアント切断時の処理
-    socket.on('disconnect', () => {
-        console.log(`A user disconnected: ${socket.id}`);
+    ws.on('close', () => {
+        console.log('Client disconnected');
+        clients.delete(ws);
+    });
+
+    // エラー処理
+    ws.on('error', (error) => {
+        console.error(`Error: ${error.message}`);
+        clients.delete(ws);
     });
 });
 
-// サーバ起動
-const PORT = config.get('port') || 3000;
-server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// メッセージ受信処理
+function onMessage(msg) {
+    console.log(`Message from client: ${msg}`);
+    // 必要に応じて全クライアントにメッセージをブロードキャスト
+    broadcast(`Echo: ${msg}`);
+}
+
+// クライアントにメッセージを送信
+function broadcast(msg) {
+    for (const client of clients) {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(msg);
+        }
+    }
+}
+
+// サーバー終了時の処理
+process.on('SIGINT', () => {
+    console.log('Server shutting down...');
+    wss.close(() => {
+        console.log('Server closed');
+    });
+    process.exit();
 });
