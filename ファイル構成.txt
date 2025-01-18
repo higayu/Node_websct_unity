@@ -1,0 +1,24 @@
+project-root/
+├── node_modules/           # 
+├── package.json           # Node.jsプロジェクトの設定ファイル
+├── package-lock.json      # 依存関係の正確なバージョンを記録
+├── server.js              # メインのサーバスクリプト
+├── config/
+│   └── default.json       # サーバ設定ファイル
+├── public/                # 静的ファイルを提供するフォルダ (Unity WebGL用など)
+│   ├── index.html         # WebGLゲームなどのHTML
+│   └── assets/            # その他の静的アセット
+├── routes/                # HTTP APIのルーティングファイル
+│   ├── api.js             # APIエンドポイント
+│   └── game.js            # ゲーム関連API
+│   └── user.js            # 
+├── sockets/               # WebSocket関連ロジック
+│   └── gameSocket.js      # ゲーム用のSocket.IOイベントハンドラ
+├── controllers/           # ビジネスロジックを分離
+│   ├── gameController.js  # ゲーム関連のロジック
+│   └── userController.js  # ユーザー関連のロジック
+├── models/                # データモデル (必要に応じて)
+│   └── gameState.js       # ゲームの状態管理
+├── utils/                 # ユーティリティ関数
+│   └── logger.js          # ログ管理
+└── README.md              # プロジェクトの説明
