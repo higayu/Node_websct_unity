@@ -1,11 +1,12 @@
 const WebSocket = require('ws');
 
 // サーバーのホストとポート
-const HOST = '127.0.0.1';
+//const HOST = 'https://fcc123.xsrv.jp/test_higashiyama/Unity_Server/Node_websct_unity';
+const HOST = '0.0.0.0'; // または '127.0.0.1', 実際のホストアドレスに合わせて設定
 const PORT = 3000;
 
 // WebSocketサーバーを作成
-const wss = new WebSocket.Server({ host: HOST, port: PORT }, () => {
+const wss = new WebSocket.Server({ port: PORT }, () => {
     console.log(`Server started on ws://${HOST}:${PORT}`);
 });
 
